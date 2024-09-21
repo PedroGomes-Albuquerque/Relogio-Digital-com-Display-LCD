@@ -1,0 +1,72 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <ThreeWire.h>  
+#include <RtcDS1302.h>
+
+// Configurações do LCD
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Endereço do LCD pode variar (0x3F ou 0x27)
+
+// Pinos do DS1302
+#define RST_PIN 8
+#define DAT_PIN 7
+#define CLK_PIN 6
+
+// Instancia o objeto ThreeWire
+ThreeWire myWire(DAT_PIN, CLK_PIN, RST_PIN); 
+
+// Instancia o objeto RTC
+RtcDS1302<ThreeWire> rtc(myWire);
+
+// Defina a data e a hora manualmente (Ano, Mês, Dia, Hora, Minuto, Segundo)
+RtcDateTime manualDateTime(2024, 9, 7, 0, 0, 0); // Ajuste para a data e hora corretas
+
+void setup() {
+  // Inicializa o LCD
+  lcd.begin(16, 2);
+  lcd.backlight();
+
+  // Inicializa o RTC
+  rtc.Begin();
+
+  // Verifica se o RTC está em operação e define a data e hora manualmente
+  if (!rtc.IsDateTimeValid()) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Ajustando RTC...");
+    rtc.SetDateTime(manualDateTime); // Ajusta a data e hora manualmente
+  }
+
+  // Se o RTC não estiver funcionando, ajusta o relógio
+  if (!rtc.GetIsRunning()) {
+    rtc.SetIsRunning(true);
+    rtc.SetDateTime(manualDateTime); // Ajusta a data e hora manualmente
+  }
+}
+
+void loop() {
+  // Pega a data e a hora atual do RTC
+  RtcDateTime now = rtc.GetDateTime();
+
+  // Exibe a data no formato DD/MM/YY
+  lcd.setCursor(0, 0);
+  lcd.print(now.Day() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
+  lcd.print(now.Day(), DEC);
+  lcd.print('/');
+  lcd.print(now.Month() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
+  lcd.print(now.Month(), DEC);
+  lcd.print('/');
+  lcd.print(now.Year() % 100); // Exibe os últimos dois dígitos do ano
+
+  // Exibe a hora no formato 24 horas (horário militar)
+  lcd.setCursor(0, 1);
+  lcd.print(now.Hour() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
+  lcd.print(now.Hour(), DEC);
+  lcd.print(':');
+  lcd.print(now.Minute() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
+  lcd.print(now.Minute(), DEC);
+  lcd.print(':');
+  lcd.print(now.Second() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
+  lcd.print(now.Second(), DEC);
+
+  delay(1000);
+}
