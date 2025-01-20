@@ -13,7 +13,7 @@ O código deste projeto configura o RTC DS1302 para fornecer a data e hora atuai
 - 1 x Display LCD 16x2 com interface I2C
 - Fios de conexão
 - Protoboard (opcional)
-- Bateria para o RTC (opcional, mas recomendada para manter o horário correto)
+- Bateria para o RTC
 
 ## Esquema de Conexão
 
