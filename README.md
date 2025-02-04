@@ -38,9 +38,9 @@ Este projeto utiliza um **Arduino Uno**, um **módulo RTC DS1302** e um **displa
 Antes de compilar e carregar o código no Arduino, instale as bibliotecas necessárias na IDE do Arduino:
 
 - **Wire.h** (já incluída na IDE do Arduino)
-- **LiquidCrystal\_I2C.h** (para o LCD I2C)
-- **ThreeWire.h** (para comunicação com o RTC DS1302)
-- **RtcDS1302.h** (para controle do RTC)
+- [**LiquidCrystal\_I2C.h**](https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library) (para o LCD I2C)
+- [**ThreeWire.h**](https://github.com/Makuna/Rtc/blob/master/src/ThreeWire.h) (para comunicação com o RTC DS1302)
+- [**RtcDS1302.h**](https://github.com/Makuna/Rtc/blob/master/src/RtcDS1302.h) (para controle do RTC)
 
 Você pode instalar as bibliotecas pela "Biblioteca Gerenciador" na IDE do Arduino.
 
