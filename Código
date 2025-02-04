@@ -1,72 +1,111 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <ThreeWire.h>  
+#include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-// Configurações do LCD
-LiquidCrystal_I2C lcd(0x27, 16, 2); // Endereço do LCD pode variar (0x3F ou 0x27)
+// LCD Configuration
+#define LCD_ADDRESS 0x27
+#define LCD_COLUMNS 16
+#define LCD_ROWS 2
 
-// Pinos do DS1302
+LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
+
+// DS1302 Pins
 #define RST_PIN 8
 #define DAT_PIN 7
 #define CLK_PIN 6
 
-// Instancia o objeto ThreeWire
-ThreeWire myWire(DAT_PIN, CLK_PIN, RST_PIN); 
-
-// Instancia o objeto RTC
+ThreeWire myWire(DAT_PIN, CLK_PIN, RST_PIN);
 RtcDS1302<ThreeWire> rtc(myWire);
 
-// Defina a data e a hora manualmente (Ano, Mês, Dia, Hora, Minuto, Segundo)
-RtcDateTime manualDateTime(2024, 9, 7, 0, 0, 0); // Ajuste para a data e hora corretas
+// Manual DateTime (Year, Month, Day, Hour, Minute, Second)
+RtcDateTime manualDateTime(2024, 9, 7, 0, 0, 0);
 
 void setup() {
-  // Inicializa o LCD
-  lcd.begin(16, 2);
-  lcd.backlight();
+  Serial.begin(9600); // Initialize Serial for debugging
 
-  // Inicializa o RTC
+  // Initialize LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Initializing...");
+
+  // Initialize RTC
   rtc.Begin();
 
-  // Verifica se o RTC está em operação e define a data e hora manualmente
+  // Check if RTC is valid and set manual time if needed
   if (!rtc.IsDateTimeValid()) {
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("Ajustando RTC...");
-    rtc.SetDateTime(manualDateTime); // Ajusta a data e hora manualmente
+    lcd.print("Setting RTC...");
+    rtc.SetDateTime(manualDateTime);
+  } else {
+    Serial.println("RTC DateTime is valid.");
   }
 
-  // Se o RTC não estiver funcionando, ajusta o relógio
+  // Ensure RTC is running
   if (!rtc.GetIsRunning()) {
+    Serial.println("RTC is not running. Starting RTC...");
     rtc.SetIsRunning(true);
-    rtc.SetDateTime(manualDateTime); // Ajusta a data e hora manualmente
+    rtc.SetDateTime(manualDateTime);
+  } else {
+    Serial.println("RTC is already running.");
   }
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("RTC Ready");
+  delay(2000);
+  
+  lcd.clear();
+}
+
+void displayDateTime(const RtcDateTime& now) {
+  // Display Date (DD/MM/YY)
+  lcd.setCursor(0, 0);
+  lcd.print(now.Day() < 10 ? "0" : "");
+  lcd.print(now.Day(), DEC);
+  lcd.print('/');
+  lcd.print(now.Month() < 10 ? "0" : "");
+  lcd.print(now.Month(), DEC);
+  lcd.print('/');
+  lcd.print(now.Year() % 100);
+
+  // Display Time (HH:MM:SS)
+  lcd.setCursor(0, 1);
+  lcd.print(now.Hour() < 10 ? "0" : "");
+  lcd.print(now.Hour(), DEC);
+  lcd.print(':');
+  lcd.print(now.Minute() < 10 ? "0" : "");
+  lcd.print(now.Minute(), DEC);
+  lcd.print(':');
+  lcd.print(now.Second() < 10 ? "0" : "");
+  lcd.print(now.Second(), DEC);
+
+  // Print to Serial for debugging
+  Serial.print("Date: ");
+  Serial.print(now.Day() < 10 ? "0" : "");
+  Serial.print(now.Day(), DEC);
+  Serial.print('/');
+  Serial.print(now.Month() < 10 ? "0" : "");
+  Serial.print(now.Month(), DEC);
+  Serial.print('/');
+  Serial.println(now.Year() % 100);
+
+  Serial.print("Time: ");
+  Serial.print(now.Hour() < 10 ? "0" : "");
+  Serial.print(now.Hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.Minute() < 10 ? "0" : "");
+  Serial.print(now.Minute(), DEC);
+  Serial.print(':');
+  Serial.println(now.Second() < 10 ? "0" : "");
+  Serial.println(now.Second(), DEC);
 }
 
 void loop() {
-  // Pega a data e a hora atual do RTC
   RtcDateTime now = rtc.GetDateTime();
-
-  // Exibe a data no formato DD/MM/YY
-  lcd.setCursor(0, 0);
-  lcd.print(now.Day() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
-  lcd.print(now.Day(), DEC);
-  lcd.print('/');
-  lcd.print(now.Month() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
-  lcd.print(now.Month(), DEC);
-  lcd.print('/');
-  lcd.print(now.Year() % 100); // Exibe os últimos dois dígitos do ano
-
-  // Exibe a hora no formato 24 horas (horário militar)
-  lcd.setCursor(0, 1);
-  lcd.print(now.Hour() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
-  lcd.print(now.Hour(), DEC);
-  lcd.print(':');
-  lcd.print(now.Minute() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
-  lcd.print(now.Minute(), DEC);
-  lcd.print(':');
-  lcd.print(now.Second() < 10 ? "0" : ""); // Adiciona zero à esquerda, se necessário
-  lcd.print(now.Second(), DEC);
-
-  delay(1000);
+  displayDateTime(now);
+  delay(1000); // Update every second
 }
