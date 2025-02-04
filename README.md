@@ -46,7 +46,7 @@ Você pode instalar as bibliotecas pela "Biblioteca Gerenciador" na IDE do Ardui
 
 ## Funcionamento
 
-1. O LCD exibe "Initializing..." ao ligar o sistema.
+1. O LCD exibe "RTC ready" ao ligar o sistema.
 2. O RTC DS1302 é inicializado e sua data/hora são verificadas.
 3. Caso o RTC não tenha uma data/hora válida, ele é configurado manualmente para `07/09/2024 00:00:00`.
 4. O LCD exibe a data e a hora em tempo real, atualizando a cada segundo.
